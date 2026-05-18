@@ -1,0 +1,133 @@
+from dataclasses import dataclass, field
+from typing import List, Optional, Type, TypeVar
+
+T = TypeVar("T", bound="DataClassMixin")  # для красивого возвращаемого типа
+
+class DataClassMixin:
+    @classmethod
+    def from_dict(cls: Type[T], data: dict) -> T:
+        raise NotImplementedError
+
+
+@dataclass
+class User(DataClassMixin):
+    id: int
+    is_bot: bool
+    first_name: str
+    username: Optional[str] = None
+    language_code: Optional[str] = None
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "User":
+        return cls(
+            id=data["id"],
+            is_bot=data["is_bot"],
+            first_name=data["first_name"],
+            username=data.get("username"),
+            language_code=data.get("language_code"),
+        )
+
+
+@dataclass
+class Chat(DataClassMixin):
+    id: int
+    type: str
+    first_name: Optional[str] = None
+    username: Optional[str] = None
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "Chat":
+        return cls(
+            id=data["id"],
+            type=data["type"],
+            first_name=data.get("first_name"),
+            username=data.get("username"),
+        )
+
+
+@dataclass
+class MessageEntity(DataClassMixin):
+    offset: int
+    length: int
+    type: str
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "MessageEntity":
+        return cls(
+            offset=data["offset"],
+            length=data["length"],
+            type=data["type"],
+        )
+
+
+@dataclass
+class Message(DataClassMixin):
+    message_id: int
+    from_user: User
+    chat: Chat
+    date: int
+    text: Optional[str] = None
+    entities: Optional[List[MessageEntity]] = None
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "Message":
+        return cls(
+            message_id=data["message_id"],
+            from_user=User.from_dict(data["from"]),
+            chat=Chat.from_dict(data["chat"]),
+            date=data["date"],
+            text=data.get("text"),
+            entities=(
+                [MessageEntity.from_dict(e) for e in data["entities"]]
+                if data.get("entities") is not None
+                else None
+            ),
+        )
+
+
+@dataclass
+class Update(DataClassMixin):
+    update_id: int
+    message: Optional[Message] = None
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "Update":
+        return cls(
+            update_id=data["update_id"],
+            message=Message.from_dict(data["message"]) if "message" in data else None,
+        )
+    
+@dataclass
+class UpdatePool:
+    """Пул для накопления и сортировки обновлений по ID пользователя."""
+    updates: List[Update] = field(default_factory=list)
+
+    def add_update(self, update: Update) -> None:
+        """Добавить одно обновление в пул."""
+        self.updates.append(update)
+
+    def add_updates(self, updates: List[Update]) -> None:
+        """Добавить список обновлений."""
+        self.updates.extend(updates)
+
+    def sort_by_user_id(self, reverse: bool = False) -> None:
+        """
+        Сортировать обновления по user.id (ID отправителя).
+        Обновления без message или без from_user помещаются в начало (id=0).
+        """
+        self.updates.sort(
+            key=lambda u: (
+                u.message.from_user.id
+                if u.message and u.message.from_user
+                else 0
+            ),
+            reverse=reverse,
+        )
+
+    @classmethod
+    def from_dict(cls, data: List[dict]) -> "UpdatePool":
+        """Создать пул из списка словарей"""
+        pool = cls()
+        for item in data:
+            pool.add_update(Update.from_dict(item))
+        return pool

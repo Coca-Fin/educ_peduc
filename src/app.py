@@ -1,4 +1,4 @@
-from bot import Educ
+from bot_wrapper import Educ
 from OWM import OpenWeatherMap
 from llm import DeepSeek
 from utils import (save_offset, load_offset)
@@ -36,28 +36,9 @@ def main():
 
     print(bot.offset)
     response = bot.get_updates()
-    
-    for request in response["result"]:
-        message: dict = request.get("message")
-        #todo: преписать лаконичнее
-        is_command = False
-        if message and "text" in message:
-            entities = message.get("entities", [])
-            for entity in entities:
-                if entity.get("type") == "bot_command":
-                    is_command = True
-                    break
 
-        if not is_command:
-            chat_id = message["chat"]["id"]
-            bot.send_message(chat_id, "Воспользуйтесь, командами бота")
-        else:
-            pass
-
-
-           
-        bot.save_offset(request["update_id"]+1)
-        print(request)
+    bot.save_offset(request["update_id"]+1)
+    print(request)
 
 
 

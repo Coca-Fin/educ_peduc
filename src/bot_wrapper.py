@@ -22,45 +22,6 @@ class Educ():
         self.http: ProxyManager = request_manager
         self.last_data: dict = {}
 
-    def __api_request(self, method, data=None) -> HTTPResponse:
-        response: HTTPResponse = self.http.request(
-            "POST",
-            self.url+method,
-            fields=data or {}
-        )
-        return response
-
-    def __save_user_city(user_id: int, city: str) -> None:
-        path = join(dirname(__file__), "users.yaml")
-        try:
-            with open(path, "r") as f:
-                data = safe_load(f) or {}
-        except FileNotFoundError:
-            data = {}
-        data[user_id] = city
-        with open(path, "w") as f:
-            safe_dump(data, f)
-
-    def __load_user_city(user_id: int):
-        path = join(dirname(__file__), "users.yaml")
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                data = safe_load(f)
-            if data and user_id in data:
-                return data[user_id]
-            return None
-        except FileNotFoundError:
-            return None
-
-    def __load_offset() -> int:
-        path = join(dirname(__file__), ".offset")
-        try:
-            with open(path, "r") as f:
-                return int(f.read().strip())
-        except (FileNotFoundError, ValueError) as e :
-            print(f"Educ.__load_offset ERROR: {e}")
-            return 0
-
     def get_updates(self) -> dict:
         response = self.__api_request("getUpdates", {
             "timeout": 15,
@@ -136,8 +97,48 @@ class Educ():
         path = join(dirname(__file__), ".offset")
         with open(path, "w") as f:
             f.write(str(offset))
+    
+    def save_user_data(self, data) -> None:
+        pass
 
+    def __api_request(self, method, data=None) -> HTTPResponse:
+        response: HTTPResponse = self.http.request(
+            "POST",
+            self.url+method,
+            fields=data or {}
+        )
+        return response
 
+    def __save_user_city(user_id: int, city: str) -> None:
+        path = join(dirname(__file__), "users.yaml")
+        try:
+            with open(path, "r") as f:
+                data = safe_load(f) or {}
+        except FileNotFoundError:
+            data = {}
+        data[user_id] = city
+        with open(path, "w") as f:
+            safe_dump(data, f)
+
+    def __load_user_city(user_id: int):
+        path = join(dirname(__file__), "users.yaml")
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                data = safe_load(f)
+            if data and user_id in data:
+                return data[user_id]
+            return None
+        except FileNotFoundError:
+            return None
+
+    def __load_offset() -> int:
+        path = join(dirname(__file__), ".offset")
+        try:
+            with open(path, "r") as f:
+                return int(f.read().strip())
+        except (FileNotFoundError, ValueError) as e :
+            print(f"Educ.__load_offset ERROR: {e}")
+            return 0
 
 
 

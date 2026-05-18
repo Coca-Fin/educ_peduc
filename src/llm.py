@@ -3,11 +3,11 @@ from json import (dumps, loads)
 from urllib3 import (ProxyManager, HTTPResponse)
 from yaml import safe_load
 from pathlib import Path
+from typing import (Dict)
 
 
 class DeepSeek():
     """
-    правильнее было бы использовать абстракцию
 
     args:
         request_manager: urllib3 ProxyManager or PoolManager
@@ -20,12 +20,15 @@ class DeepSeek():
         self.payload: dict = {}
         self.data: dict = {}
 
+    def get_recomedation(self, data: Dict) -> Dict:
+        response = self.__api_request(data=self.__create_payload(self.__create_massages(data)))
+        return loads(response)
+    
     def __api_request(self, data={}) -> HTTPResponse:
         headers={
                 'Content-Type': 'application/json',
                 'Authorization': f'Bearer {self.__token}'
             }
-        print(headers)
         response: HTTPResponse = self.http.request(
             "POST",
             self.url,
@@ -58,12 +61,9 @@ class DeepSeek():
                 "content":f"{prompts['user']['content']}\n{dumps(data, ensure_ascii=False, indent=2)}"
             }
         ]
-        
+    
         return massages
     
-    def get_recomedation(self, data: dict) -> dict:
-        response = self.__api_request(data=self.__create_payload(self.__create_massages(data)))
-        return loads(response)
 
         
     
