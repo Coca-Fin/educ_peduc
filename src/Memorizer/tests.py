@@ -239,9 +239,12 @@ class TestChatService(unittest.TestCase):
         self.assertEqual(
             self.user_repo.find_by_id(self.user_ctx.id).active_chain,
             NOT_CONNECTED)
-
+        
+        # id чата должно соответсоввать первоначальному владельцу
+        # Странно было бы, если бы чат можно было захватить)))
+        # К вам в чат вторгнулся другой пользователь!!!
         self.assertEqual(
-            self.chain_repo.find_by_id(self.chain_ctx.id).user_id, 0)
+            self.chain_repo.find_by_id(self.chain_ctx.id).user_id, 1)
 
 
 if __name__ == "__main__":

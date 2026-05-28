@@ -21,12 +21,6 @@ class ChatService:
             logger.error("Cannot connect: user %s not found", user_id)
             return False
 
-        old_chain_id = user.active_chain
-        if old_chain_id != NOT_CONNECTED and old_chain_id != chain_id:
-            self.chain_repo.safe_update(old_chain_id,
-                                        lambda c: c.set_user(NOT_CONNECTED))
-            logger.debug("Chain %s released from user %s", old_chain_id, user_id)
-
         if chain_id != NOT_CONNECTED:
             if not self.chain_repo.find_by_id(chain_id):
                 logger.error("Connect failed: chain %s not found", chain_id)
