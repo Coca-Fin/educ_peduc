@@ -20,6 +20,6 @@ jobs:
           GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
           GITLAB_REPO: ${{ secrets.GITLAB_REPO }}
         run: |
-          git remote remove gitlab 2>/dev/null || true
-          git remote add gitlab "${GITLAB_REPO}"
-          git push --mirror "https://oauth2:${GITLAB_TOKEN}@${GITLAB_REPO#https://}"
+          git remote add gitlab "https://oauth2:${GITLAB_TOKEN}@${GITLAB_REPO#https://}"
+          git push gitlab --all --prune
+          git push gitlab --tags --prune
