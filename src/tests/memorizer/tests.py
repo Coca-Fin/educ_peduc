@@ -5,11 +5,11 @@ from datetime import datetime
 from pathlib import Path
 from copy import deepcopy
 
-from structs import *
-from repositories import UserRepo, MessageChainRepo
-from chat import ChatService
+from Memorizer.structs import *
+from Memorizer.repositories import UserRepo, MessageChainRepo
+from Memorizer.chat import ChatService
 
-logs_path = Path(__file__).parent.resolve() / "test_logs.log"
+logs_path = Path(__file__).parent.resolve() / "logs/test_logs.log"
 logging.basicConfig(filename=logs_path, level=logging.DEBUG)
 LOGGER = logging.getLogger("TEST")
 
